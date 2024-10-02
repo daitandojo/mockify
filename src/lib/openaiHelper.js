@@ -32,6 +32,8 @@ export async function generateQuestions({
   Questions should be tough, tricky and relevant to the topic and syllabus.
   Each question should test key concepts.
 
+  CRUCIAL: The answers should not be ambiguous, i.e. only one answer can
+  be correct (and needs to be correct)
   CRUCIAL: Your response should be in the form of a well-structured JSON object.
   An example for such a response is (voor een Risk and Tax exam):
 
