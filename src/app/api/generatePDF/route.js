@@ -1,12 +1,18 @@
-import { generateQuestions } from '../../../lib/openaiHelper';
+// src/app/api/generatePDF/route.js
 import { createPDF } from '../../../lib/pdfHelper.js';
 
 export async function POST(request) {
-  const { title, topic, level, syllabus, numberOfQuestions, numberOfAnswers } = await request.json();
-  
+  const { title, topic, instructions, level, numberOfQuestions, questions } = await request.json();
+
   try {
-    const examData = await generateQuestions({ title, topic, level, syllabus, numberOfQuestions, numberOfAnswers });
-    const pdfBytes = await createPDF(examData);
+    const pdfBytes = await createPDF({
+      title,
+      topic,
+      instructions,
+      level,
+      numberOfQuestions,
+      questions,
+    });
 
     return new Response(pdfBytes, {
       headers: {
@@ -15,6 +21,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
+    console.error("Error generating PDF:", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

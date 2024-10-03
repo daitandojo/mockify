@@ -1,8 +1,21 @@
-// src/lib/pdfHelper.js
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
-export async function createPDF({ title, instructions, questions }) {
+export async function createPDF({ 
+  title, 
+  topic, 
+  instructions, 
+  level, 
+  numberOfQuestions, 
+  questions 
+}) {
   try {
+    console.log("CREATE PDF DOCUMENT");
+    console.log(`Title: ${title}`);
+    console.log(`Topic: ${topic}`);
+    console.log(`Instructions: ${instructions}`);
+    console.log(`Number of questions: ${numberOfQuestions}`);
+    console.log(`Questions: ${JSON.stringify(questions)}`);
+    
     const pdfDoc = await PDFDocument.create();
 
     // Embedding fonts and creating pages
@@ -15,6 +28,11 @@ export async function createPDF({ title, instructions, questions }) {
 
     // Helper function to add wrapped text, while checking for page overflow
     function addWrappedText(page, text, x, y, options) {
+      if (typeof text !== 'string' || text.trim() === '') {
+        console.error('Invalid text for addWrappedText:', text);
+        throw new Error('Text must be a non-empty string.');
+      }
+
       const { font, size, lineHeight, maxWidth } = options;
       const words = text.split(' ');
       let line = '';
@@ -43,8 +61,9 @@ export async function createPDF({ title, instructions, questions }) {
       // Draw the last line
       if (line !== '') {
         page.drawText(line.trim(), { x, y: currentY, size, font });
+        currentY -= lineHeight; // Move down after drawing the final line
       }
-      return { page, y: currentY - lineHeight };
+      return { page, y: currentY };
     }
 
     // Add Title
@@ -56,9 +75,35 @@ export async function createPDF({ title, instructions, questions }) {
     }));
     y -= 20;
 
+    // Add topic as subtitle
+    // ({ page, y } = addWrappedText(page, `Topic: ${topic}`, margin, y, {
+    //   font: italicFont,
+    //   size: 12,
+    //   lineHeight: 18,
+    //   maxWidth: 495,
+    // }));
+    // y -= 20;
+
+    // Add Level and Number of Questions
+    // ({ page, y } = addWrappedText(page, `Level: ${level}`, margin, y, {
+    //   font: italicFont,
+    //   size: 12,
+    //   lineHeight: 18,
+    //   maxWidth: 495,
+    // }));
+    // y -= 20;
+
+    // ({ page, y } = addWrappedText(page, `Number of Questions: ${numberOfQuestions}`, margin, y, {
+    //   font: italicFont,
+    //   size: 12,
+    //   lineHeight: 18,
+    //   maxWidth: 495,
+    // }));
+    // y -= 30;
+
     // Add Instructions
-    ({ page, y } = addWrappedText(page, instructions, margin, y, {
-      font: italicFont,
+    ({ page, y } = addWrappedText(page, `${instructions}`, margin, y, {
+      font: timesRomanFont,
       size: 12,
       lineHeight: 18,
       maxWidth: 495,
@@ -67,6 +112,11 @@ export async function createPDF({ title, instructions, questions }) {
 
     // Add Questions and Options with Proper Pagination
     questions.forEach((questionObj, index) => {
+      if (!questionObj.question || !Array.isArray(questionObj.options)) {
+        console.error('Invalid question or options:', questionObj);
+        throw new Error('Each question must have a valid "question" and "options" array.');
+      }
+
       // Add Question
       ({ page, y } = addWrappedText(page, `Q${index + 1}: ${questionObj.question}`, margin, y, {
         font: timesRomanFont,
@@ -77,8 +127,13 @@ export async function createPDF({ title, instructions, questions }) {
       y -= 10;
 
       // Add Options
-      questionObj.options.forEach((option) => {
-        ({ page, y } = addWrappedText(page, option, margin, y, {
+      questionObj.options.forEach((option, optionIndex) => {
+        if (typeof option !== 'string' || option.trim() === '') {
+          console.error('Invalid option:', option);
+          throw new Error('Each option must be a non-empty string.');
+        }
+
+        ({ page, y } = addWrappedText(page, `${option}`, margin, y, {
           font: timesRomanFont,
           size: 12,
           lineHeight: 18,
@@ -117,6 +172,11 @@ export async function createPDF({ title, instructions, questions }) {
 
     // Add each answer and rationale
     questions.forEach((questionObj, index) => {
+      if (!questionObj.correctAnswer || !questionObj.rationale) {
+        console.error('Invalid answer or rationale:', questionObj);
+        throw new Error('Each question must have a valid "correctAnswer" and "rationale".');
+      }
+
       // Add Answer Heading
       ({ page, y } = addWrappedText(page, `Q${index + 1} - Correct Answer: ${questionObj.correctAnswer}`, margin, y, {
         font: timesRomanFont,
@@ -146,6 +206,7 @@ export async function createPDF({ title, instructions, questions }) {
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
   } catch (error) {
+    console.error("Error in createPDF:", error); // More detailed error logging
     throw new Error(`Failed to create PDF: ${error.message}`);
   }
 }

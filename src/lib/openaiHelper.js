@@ -1,85 +1,107 @@
-// src/lib/openaiHelper.js
-import { configureEnv } from 'daitanjs/development';
-import dotenv from 'dotenv';
-import path from 'path';
 import { construct, generateIntelligence } from 'daitanjs/intelligence';
-
-// Configure dotenv to read from your environment
-configureEnv();
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+// import dotenv from 'dotenv';
+// dotenv.config();
 
 export async function generateQuestions({
-  title = "Trivial Pursuit Questions",
   topic = "General Knowledge",
   level = "University undergraduate",
-  syllabus = "Wikipedia",
   numberOfQuestions = 4,
-  numberOfAnswers = 4
+  numberOfAnswers = 4,
+  onBatchComplete
 }) {
-  const prompt = `
-  Create a challenging mock exam for the following topic: '${topic}',
-  with the title: ${title}. The level of the exam should be ${level},
-  and it should be based on the ${syllabus}.
- 
-  The exam should have the following structure:
-  1. A clear title
-  2. Ample instructions for the exam. Each quesion carries equal marks.
-  3. ${numberOfQuestions} tricky multiple-choice questions.
+  const questionsPerBatch = 5;
+  const totalBatches = Math.ceil(numberOfQuestions / questionsPerBatch);
+  let questions = [];
+  let title = '';
+  let instructions = '';
+
+  for (let batch = 0; batch < totalBatches; batch++) {
+    const currentBatchSize = Math.min(questionsPerBatch, numberOfQuestions - batch * questionsPerBatch);
+
+    const prompt = `
+    Create a challenging mock exam for the following topic: '${topic}'. 
+    The level of the exam should be ${level}.
   
-  Each question will have ${numberOfAnswers} options to choose from. 
-  Include correct answers and rationales for each question in your response.
-
-  Questions should be tough, tricky and relevant to the topic and syllabus.
-  Each question should test key concepts.
-
-  CRUCIAL: The answers should not be ambiguous, i.e. only one answer can
-  be correct (and needs to be correct)
-  CRUCIAL: Your response should be in the form of a well-structured JSON object.
-  An example for such a response is (voor een Risk and Tax exam):
-
-    {
-      "title": "Investment Risk and Tax Exam",
-      "instructions": "Answer all questions. Each question carries equal marks.",
-      "questions": [
-        {
-          "question": "Describe a challenging question here?",
-          "options": [
-            "A. First Option",
-            "B. Second Option",
-            "C. Third Option",
-            "D. Fourth Option"
-          ],
-          "correctAnswer": "Option B",
-          "rationale": "Explain why Option B is the correct answer."
-        },
-        {
-          "question": "Another challenging question here?",
-          "options": [
-            "A. First Option",
-            "B. Second Option",
-            "C. Third Option",
-            "D. Fourth Option"
-          ],
-          "correctAnswer": "Option D",
-          "rationale": "Explain why Option D is the correct answer."
-        }
-        // Continue until ${numberOfQuestions} questions
-      ]
-    }
+    The exam should have the following structure:
+    1. A clear title for the exam, appropriate to the topic and level.
+    2. Ample instructions for the exam, such as "Each question carries equal marks.".
+       Aim for 5 phrases that put the candidate at ease as well.
+    3. ${currentBatchSize} tricky multiple-choice questions about a
+       range of fields within the topic.
     
-    Please provide the response in **strict JSON format** without any additional text or formatting outside of the JSON.
-  `;
+    Each question will have ${numberOfAnswers} options to choose from. 
 
-  try {
-    const messages = construct({ instruction: prompt });
-    const response = await generateIntelligence({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: 2000,
-    });
+    Questions should be tough, tricky, and relevant to the topic and syllabus.
+    Each question should test key concepts. ONLY someone who has studied 
+    the matter (beyond general knowledge) should be able to answer them.
 
-    return response;
-  } catch (error) {
-    throw new Error(`Failed to generate questions: ${error.message}`);
+    Your response should for each question also include the correct answers,
+    and a rationale for why this is the correct answer.
+    One of the answers should be **totally** correct. CRITICAL however,
+    is that the answers should not be ambiguous, i.e. 
+    ONLY ONE answer can be fully correct.
+
+    The rationale should explain why the correct answer is correct, and may also
+    explain why the second-best answer is not correct.
+
+    CRUCIAL: Your response should be in the form of a well-structured JSON object.
+    An example for such a response is (voor een Risk and Tax exam):
+
+      {
+        "title": "Risk and Tax Exam",
+        "topic": "Investment Risk and Tax",
+        "instructions": "Each question carries equal marks. Read each question carefully.",
+        "questions": [
+          {
+            "question": "Describe a challenging question here?",
+            "options": [
+              "A. First Option",
+              "B. Second Option",  // Correct answer
+              "C. Third Option",
+              "D. Fourth Option"   // Second best answer
+            ],
+            "correctAnswer": "Option B",
+            "rationale": "Explain why Option B is the correct answer, and Option D is not."
+          }
+          // Continue until ${currentBatchSize} questions
+        ]
+      }
+      
+      Please provide the response in **strict JSON format** without any additional text or formatting outside of the JSON.
+    `;
+
+    try {
+      const messages = construct({ instruction: prompt });
+      const response = await generateIntelligence({
+        model: 'gpt-4o',
+        messages,
+        max_tokens: 2000,
+      });
+
+      // Parse the JSON response
+      const parsedResponse = response; // JSON.parse(response);
+
+      if (batch === 0) {
+        title = parsedResponse.title;
+        instructions = parsedResponse.instructions;
+      }
+
+      questions = questions.concat(parsedResponse.questions);
+
+      if (onBatchComplete) {
+        onBatchComplete({ batchNumber: batch + 1, totalBatches });
+      }
+    } catch (error) {
+      throw new Error(`Failed to generate questions for batch ${batch + 1}: ${error.message}`);
+    }
   }
+
+  return { 
+    title, 
+    topic, 
+    instructions, 
+    level,
+    numberOfQuestions,
+    questions
+  };
 }
