@@ -1,7 +1,8 @@
 // src/app/layout.js
 
-import './globals.css';
+import './styles/globals.css';
 import { Pacifico } from 'next/font/google';
+import ClientWrapper from './wrappers/ClientWrapper'
 
 // Using the Google Font Utility to Load Pacifico
 const pacifico = Pacifico({ subsets: ['latin'], weight: '400', display: 'swap' });
@@ -17,9 +18,11 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className={pacifico.className}>
-        {children}
-      </body>
+      <ClientWrapper>
+        <body className={pacifico.className}>
+          {children}
+        </body>
+      </ClientWrapper>
     </html>
   );
 }

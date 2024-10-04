@@ -4,6 +4,7 @@
 
 import { useEffect } from 'react';
 import { CssBaseline } from '@mui/material';
+import { ExamProvider } from '../../contexts/ExamContext'
 
 export default function ClientWrapper({ children }) {
   useEffect(() => {
@@ -12,9 +13,9 @@ export default function ClientWrapper({ children }) {
   }, []);
 
   return (
-    <>
+    <ExamProvider>
       <CssBaseline />
       {children}
-    </>
+    </ExamProvider>
   );
 }

@@ -172,7 +172,7 @@ export async function createPDF({
 
     // Add each answer and rationale
     questions.forEach((questionObj, index) => {
-      if (!questionObj.correctAnswer || !questionObj.rationale) {
+      if (!questionObj.correctAnswer===null || !questionObj.rationale) {
         console.error('Invalid answer or rationale:', questionObj);
         throw new Error('Each question must have a valid "correctAnswer" and "rationale".');
       }
