@@ -60,7 +60,7 @@ export async function generateQuestions({
               "C. Third Option",
               "D. Fourth Option"   // Second best answer
             ],
-            "correctAnswer": "Option B",
+            "correctAnswer": <number>, /// the index of the correct answer in the array of options, here 1
             "rationale": "Explain why Option B is the correct answer, and Option D is not."
           }
           // Continue until ${currentBatchSize} questions
@@ -73,7 +73,7 @@ export async function generateQuestions({
     try {
       const messages = construct({ instruction: prompt });
       const response = await generateIntelligence({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages,
         max_tokens: 2000,
       });

@@ -177,8 +177,11 @@ export async function createPDF({
         throw new Error('Each question must have a valid "correctAnswer" and "rationale".');
       }
 
+      // Get the correct answer letter (e.g., "A" for index 0)
+      const correctAnswerLetter = String.fromCharCode(65 + questionObj.correctAnswer);
+
       // Add Answer Heading
-      ({ page, y } = addWrappedText(page, `Q${index + 1} - Correct Answer: ${questionObj.correctAnswer}`, margin, y, {
+      ({ page, y } = addWrappedText(page, `Q${index + 1} - Correct Answer: ${correctAnswerLetter}`, margin, y, {
         font: timesRomanFont,
         size: 14,
         lineHeight: 24,
