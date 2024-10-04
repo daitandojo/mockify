@@ -21,7 +21,7 @@ const ExamModalContent = ({
         ) : (
           <>
             <Typography variant="h5" sx={{ mb: 4, fontWeight: 'bold' }}>
-              You've completed the exam!
+              You have completed the exam!
             </Typography>
             <Button
               variant="contained"
