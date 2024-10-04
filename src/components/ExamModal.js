@@ -86,7 +86,7 @@ const ExamModal = ({ open, onClose, examData }) => {
           ) : (
             <>
               <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
-                You've completed the exam!
+                You&apos;ve completed the exam!
               </Typography>
               <Button
                 variant="contained"
