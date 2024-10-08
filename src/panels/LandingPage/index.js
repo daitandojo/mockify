@@ -73,7 +73,7 @@ export default function LandingPage() {
           Mockify
         </Typography>
         <Typography variant="h2" sx={headerSubTextStyle}>
-          Exploring the Art of Learning
+          Materials ● Exams ● Mock Exams ● Classroom Supervision
         </Typography>
         <InputFields />
         {error && (
