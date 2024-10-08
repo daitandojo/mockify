@@ -1,0 +1,29 @@
+import { generateExam } from '../../../app/helpers/helpersExamGeneration';
+import { convertExamToPDF } from '../../../app/helpers/helpersExamToPDF';
+
+export default async function handleconvertExamToPDF({
+  topic,
+  level,
+  numberOfQuestions,
+  numberOfOptions,
+  setBusy,
+  setError,
+}) {
+  setBusy('preparingpdf');
+  setError('');
+
+  try {
+    const exam = await generateExam({
+      topic,
+      level,
+      numberOfQuestions,
+      numberOfOptions,
+    });
+
+    await convertExamToPDF(exam);
+  } catch (err) {
+    setError('An error occurred: ' + err.message);
+  } finally {
+    setBusy(null);
+  }
+}

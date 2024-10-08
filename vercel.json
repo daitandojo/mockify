@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/*": {
+      "runtime": "nodejs22.6"  // Replace with your preferred version
+    }
+  }
+}

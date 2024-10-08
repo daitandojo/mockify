@@ -1,0 +1,44 @@
+import { generateExam } from '../../../app/helpers/helpersExamGeneration';
+
+export default async function handleTestMeNow({
+  topic,
+  level,
+  numberOfQuestions,
+  setBusy,
+  setError,
+  setExamData,
+  openExamination,
+}) {
+  setBusy("preparingtest");
+  setError('');
+  
+  try {
+    console.log("GENERATING EXAM WITHOUT OPTIONS");
+    const examData = await generateExam({
+      topic,
+      level,
+      numberOfQuestions,
+      numberOfOptions: 0
+    });
+
+    // Ensure all fields are properly initialized
+    const completeExamData = {
+      ...examData,
+      questions: examData.questions.map((q) => ({
+        ...q,
+        answers: q.answers || [],
+        indexOfCorrectAnswer: q.indexOfCorrectAnswer || null,
+        rationale: q.rationale || '',
+        optionsGenerated: false, // Add a flag for whether options are generated
+      })),
+    };
+
+    console.log(completeExamData);
+    setExamData(completeExamData);
+    openExamination(true);
+  } catch (err) {
+    setError('An error occurred: ' + err.message);
+  } finally {
+    setBusy("preparingtest");
+  }
+}

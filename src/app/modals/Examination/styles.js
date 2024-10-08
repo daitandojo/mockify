@@ -1,0 +1,15 @@
+export const modalBoxStyles = (isMobile) => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: isMobile ? '90vw' : '50vw',
+  height: isMobile ? '80vh' : 'auto',
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  padding: isMobile ? 3 : 5,
+  borderRadius: 2,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+});

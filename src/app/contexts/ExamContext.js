@@ -1,11 +1,19 @@
+'use client';
+
 import { createContext, useContext } from 'react';
-import useExam from '../hooks/useExam';
+import useExamState from '../hooks/useExamState';
 
 const ExamContext = createContext();
 
 export function ExamProvider({ children }) {
-  const exam = useExam();
-  return <ExamContext.Provider value={exam}>{children}</ExamContext.Provider>;
+
+  const examState = useExamState();
+
+  return (
+    <ExamContext.Provider value={examState}>
+      {children}
+    </ExamContext.Provider>
+  );
 }
 
 export function useExamContext() {

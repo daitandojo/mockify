@@ -1,94 +1,88 @@
-"use client";
+'use client';
 
-import { Container, Typography, Grid, Alert } from '@mui/material';
-import { containerStyle, headerText, headerSubText } from './styles';
-import ExamModal from '../ExamModal';
+import { Box, Typography, Alert } from '@mui/material';
+import {
+  mainContentContainerStyle,
+  headerTextStyle,
+  headerSubTextStyle,
+} from './styles';
 import InputFields from './components/InputFields';
-import GenerateButtons from './components/GenerateButtons';
+import MainButtons from './components/MainButtons';
+import { useAppContext } from '../../app/contexts/AppContext';
 import { useExamContext } from '../../app/contexts/ExamContext';
-import handleGeneratePDF from './handlers/handleGeneratePDF';
-import handleTestMeNow from './handlers/handleTestMeNow';
+import handleCreateExam from './handlers/handleCreateExam';
+import { generateSubTopics } from '../../app/helpers/helpersExamGeneration';
 
 export default function LandingPage() {
+  // Extract appState and currentExamState from the context
   const {
-    examModalOpen,
-    setExamModalOpen,
-    error,
+    appState,
+    setBusy,
     setError,
-    examData,
-    setLoading,
-    setQuestionsRemaining,
-    setAllQuestions,
-    numberOfQuestions,
-    numberOfAnswers,
-    topic,
-    level,
-    setTestLoading,
-    setExamData,
-  } = useExamContext();
+    addExam,
+    openTreeModal,
+    setTree,
+  } = useAppContext();
+  const { examState, setExamData } = useExamContext();
 
-  const handleGeneratePDFHandler = () => {
-    handleGeneratePDF({
-      topic,
-      level,
-      numberOfQuestions,
-      numberOfAnswers,
-      setLoading,
+  // Destructure the necessary properties from appState and currentExamState
+  const { userTopic, userLevel, error } = appState;
+  const { topic, level, numberOfQuestions, numberOfOptions } = examState?.examData || {};
+
+  const handleCreateExamHandler = async () => {
+    // const tree = await generateSubTopics({
+    //   topic: userTopic,
+    //   level: userLevel
+    // });
+    // setTree(tree)
+    // openTreeModal();
+    handleCreateExam({
+      topic: userTopic,
+      level: userLevel,
+      numberOfQuestions: 10,
+      numberOfOptions,
+      setBusy,
       setError,
-      setQuestionsRemaining,
-      setAllQuestions,
+      addExam,
     });
   };
 
-  const handleTestMeNowHandler = () => {
-    handleTestMeNow({
-      topic,
-      level,
-      numberOfAnswers,
-      setTestLoading,
+  const handleCreateMaterialHandler = async () => {
+    // const tree = await generateSubTopics({
+    //   topic: userTopic,
+    //   level: userLevel
+    // });
+    // setTree(tree)
+    // openTreeModal();
+    handleCreateExam({
+      topic: userTopic,
+      level: userLevel,
+      numberOfQuestions: 10,
+      numberOfOptions,
+      setBusy,
       setError,
-      setExamData,
-      setExamModalOpen,
+      addExam,
     });
   };
-
+  
   return (
     <>
-      <Container sx={containerStyle}>
-        <Typography
-          variant="h1"
-          sx={{
-            ...headerText,
-            fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-          }}
-        >
+      {/* Main content */}
+      <Box sx={mainContentContainerStyle}>
+        <Typography variant="h1" sx={headerTextStyle}>
           Mockify
         </Typography>
-        <Typography
-          variant="h2"
-          sx={{
-            ...headerSubText,
-            fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
-          }}
-        >
-          Mock Exams on Any Topic!
+        <Typography variant="h2" sx={headerSubTextStyle}>
+          Exploring the Art of Learning
         </Typography>
         <InputFields />
         {error && (
-          <Grid item xs={12}>
-            <Alert severity="error">{error}</Alert>
-          </Grid>
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
         )}
-        <GenerateButtons
-          handleGeneratePDF={handleGeneratePDFHandler}
-          handleTestMeNow={handleTestMeNowHandler}
-        />
-      </Container>
-      <ExamModal
-        open={examModalOpen}
-        onClose={() => setExamModalOpen(false)}
-        examData={examData}
-      />    
+        <MainButtons onClick={handleCreateExamHandler} />
+      </Box>
     </>
   );
 }

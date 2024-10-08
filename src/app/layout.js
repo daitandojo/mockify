@@ -1,5 +1,3 @@
-// src/app/layout.js
-
 import './styles/globals.css';
 import { Pacifico } from 'next/font/google';
 import ClientWrapper from './wrappers/ClientWrapper'
@@ -18,11 +16,11 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <ClientWrapper>
         <body className={pacifico.className}>
-          {children}
+          <ClientWrapper>
+            {children}
+          </ClientWrapper>
         </body>
-      </ClientWrapper>
     </html>
   );
 }
